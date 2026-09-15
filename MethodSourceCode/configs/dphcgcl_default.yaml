@@ -1,0 +1,15 @@
+# ==============================================================================
+# DPHCGCL Default Experiment Entry
+# ==============================================================================
+
+defaults:
+  - default
+  - data
+  - calibration
+  - monerf
+  - dphcgcl
+  - eval
+  - _self_
+
+project:
+  name: DPHCGCL_default

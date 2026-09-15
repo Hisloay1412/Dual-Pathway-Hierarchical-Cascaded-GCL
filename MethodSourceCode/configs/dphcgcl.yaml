@@ -1,0 +1,98 @@
+# ==============================================================================
+# DPHCGCL Three-Tier Configuration
+# Architecture: Tier-1 (Transmission), Tier-2 (Spatial), Tier-3 (Global Kinematics)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Tier-1: Cross-trial redundancy contrastive decoupling  (Sec. 3.3 Tier-1)
+# ------------------------------------------------------------------------------
+tier1_transmission:
+  data:
+    repeated_measurements_M: 20            # M
+    group_id_fields: [joint_id, command_id, motion_direction]
+
+  network:
+    encoder_hidden_units: 128              # Tier1Encoder.hidden_dim
+    encoder_latent_dim: 64                 # Tier1Encoder.latent_dim
+    projection_head_dim: 16                # Tier1Encoder.proj_dim
+
+  optimization:
+    optimizer: "AdamW"
+    epochs: 300
+    batch_size: 256
+    initial_lr: 1.0e-3
+    lr_schedule: "cosine"
+    weight_decay: 1.0e-5
+
+  hyperparameters:
+    tau_r: 0.07                            # Eq. 4 temperature
+    lambda_rep: 0.5                        # Eq. 6
+    lambda_phi: 1.0e-4                     # Eq. 6
+    huber_delta: 1.0e-4                    # Eq. 5, in radians
+    noise_sigma: 1.0e-4                    # perturbed negative sigma (Sec. 3.3 Tier-1)
+
+# ------------------------------------------------------------------------------
+# Tier-2: Spatial GCN for cell-wise virtual offsets  (Sec. 3.3 Tier-2)
+# ------------------------------------------------------------------------------
+tier2_spatial_gcn:
+  network:
+    grid_size: [7, 7, 7]
+    neighborhood: 26                       # 6 / 18 / 26
+    num_layers: 3                          # Eq. 12, "3-layer GCN"
+    in_features: 11                        # Eq. 13, [c(3), cond(1), mean_eps(6), std_eps(1)]
+    hidden_channels: 64
+    readout_mlp_layers: 2                  # MLP out head depth
+    projection_dim: 16                     # Tier2Projection.out_dim
+
+  partition:
+    workspace_min: -1.0                    # metres
+    workspace_max:  1.0
+    sigma: 0.25                            # RBF width for soft partition, Eq. 7
+
+  optimization:
+    optimizer: "Adam"
+    iterations_per_cycle: 1500
+    batch_size: 32
+    initial_lr: 1.0e-3
+
+  hyperparameters:
+    tau_s: 0.1                             # Eq. 15 temperature
+    lambda_s: 0.2                          # Eq. 16
+    lambda_reg: 1.0e-4                     # Eq. 16
+
+# ------------------------------------------------------------------------------
+# Tier-3: Cross-modal global alignment  (Sec. 3.3 Tier-3)
+# ------------------------------------------------------------------------------
+tier3_global_alignment:
+  network:
+    graph_hidden: 64                       # Tier3GraphEncoder hidden_dim
+    graph_layers: 2                        # Tier3GraphEncoder num_layers
+    projection_dim: 16                     # Tier3Projection.out_dim
+
+  initialization:
+    Theta_init: "nominal"                  # or a path to a .npz with delta_twists/delta_M_se3
+    Theta_path: null
+    X_init_path: calibration/hand_eye_init.yaml
+    X_init_se3: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+  optimization:
+    optimizer: "Adam"
+    iterations_per_cycle: 2000
+    batch_size: 64
+    initial_lr: 5.0e-4
+    theta_lr: 5.0e-4                       # delta_twists, delta_M_se3
+    X_lr: 1.0e-4                           # X_se3
+
+  hyperparameters:
+    tau_c: 0.1                             # Eq. 17 temperature
+    eta_gcl: 0.1                           # Eq. 18
+    consistency_threshold: 5.0e-3          # tau_e, in se(3) norm (rad / m mixed)
+    negative_strategy: "perturb_theta_X"   # or "depth_occlusion"
+
+# ------------------------------------------------------------------------------
+# Cascade inverse + orchestrator  (Sec. 3.3, Eq. 26)
+# ------------------------------------------------------------------------------
+cascade:
+  grid_size: 7
+  re_identify_tier1: false                 # Tier-1 usually fixed after first cycle
+  tier3_backprop_to_tier2: true            # Propagate updated Theta, X into Tier-2

@@ -1,0 +1,26 @@
+# =============================================================================
+# DPHCGCL — Python dependencies
+# Tested on Python 3.10 and PyTorch 2.x.
+# =============================================================================
+
+# --- Core numerical stack ---
+torch>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# --- Configuration & entry point ---
+hydra-core>=1.3.0
+omegaconf>=2.3.0
+pyyaml>=6.0
+
+# --- Monitoring ---
+tqdm>=4.65.0
+
+# --- Differentiable rendering / NeRF backbone (core/monerf) ---
+# Required by:
+#   core/monerf/field.py    (nerfstudio.fields, field_components)
+#   core/monerf/renderer.py (nerfstudio.model_components.renderers)
+#   core/monerf/pipeline.py (nerfstudio.models.base_model, pipelines.base_pipeline,
+#                            cameras.camera_optimizers, engine.optimizers)
+#   core/monerf/pose_inversion.py (nerfstudio.cameras.camera_optimizers)
+nerfstudio>=0.3.0

@@ -1,0 +1,40 @@
+seed: 42
+device: cuda
+
+tier1:
+  lambda_rep: 0.5
+  lambda_phi: 1.0e-4
+  tau_r: 0.1
+  huber_delta: 1.0e-3
+
+tier2:
+  lambda_s: 0.1
+  lambda_reg: 1.0e-4
+  huber_delta: 1.0e-4
+  grid_size: 7
+  k_neighbors: 26
+
+tier3:
+  eta_gcl: 0.1
+  tau_c: 0.1
+  tau_e: 5.0e-4
+  huber_delta: 1.0e-4
+
+monerf:
+  lambda_depth: 0.1
+  lambda_normal: 0.05
+  lambda_defocus: 0.05
+  lambda_tv: 1.0e-3
+  gamma0: 0.1
+  tau_sched: 10000.0
+  kappa: 1.0
+  beta: 1.0
+
+loop:
+  cycles: 5
+  tier1_epochs: 200
+  tier2_epochs: 300
+  tier3_epochs: 500
+  nerf_iters: 200000
+  tol_eps: 1.0e-6
+  tol_conf: 1.0e-4

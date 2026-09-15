@@ -1,0 +1,49 @@
+# ==============================================================================
+# Data Configuration
+# ==============================================================================
+
+data:
+  robot:
+    num_joints: 6
+    joint_data_path: data/robot/joints.npz
+    optical_encoder_data_path: data/robot/optical_encoders.npz
+    # ---------------------------------------------------------------
+    # Tier-1 cross-trial redundancy (paper Sec. 3.3 Tier-1)
+    # ---------------------------------------------------------------
+    repeated_measurements_M: 20        # M repeats per (joint, command, direction)
+    group_id_fields: [joint_id, command_id, motion_direction]
+    motion_dir_epsilon: 1.0e-6         # threshold for sign(dot(theta_rob))
+
+  vision:
+    image_dir: data/vision/images
+    raw_image_dir: data/vision/raw        # for L_defocus (Eq. 20)
+    sfm_mvs_prior_dir: data/vision/sfm_mvs
+
+    # ---------------------------------------------------------------
+    # Fields consumed by MONeRFLosses.get_loss_dict
+    # ---------------------------------------------------------------
+    depth_ref_dir: data/vision/sfm_mvs/depth    # (N,1) per ray
+    normal_ref_dir: data/vision/sfm_mvs/normal  # (N,3), workpiece frame
+    pts_j_dir: data/vision/reproj/pts_j         # (N,3) L_reproj-depth (Eq.21)
+    normal_j_dir: data/vision/reproj/normal_j   # (N,3) L_reproj-normal
+
+    train_views: 150
+    unseen_target_poses: 600
+    near: 0.1
+    far: 2.0
+
+  cmm:
+    board_8ball_path: data/cmm/8ball_board.npz
+    ground_truth_path: data/cmm/ground_truth.npz
+
+  tier2:
+    # Used to build node features (Eq. 13)
+    centroids_path: data/tier2/centroids.npy
+    jacobian_cond_path: data/tier2/jacobian_cond.npy
+    mean_eps_path: data/tier2/mean_eps.npy
+    std_eps_path: data/tier2/std_eps.npy
+
+  split:
+    train_ratio: 0.8
+    val_ratio: 0.1
+    test_ratio: 0.1

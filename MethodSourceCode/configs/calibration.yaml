@@ -1,0 +1,37 @@
+# ==============================================================================
+# Calibration Configuration
+# ==============================================================================
+
+calibration:
+  camera:
+    intrinsics_path: calibration/camera_intrinsics.yaml
+    distortion_path: calibration/camera_distortion.yaml
+
+    # ---------------------------------------------------------------
+    # Optical parameters required by the MONeRF defocus module
+    # (paper Sec. 3.1.2, Eq. 14-15)
+    # ---------------------------------------------------------------
+    optics:
+      focal_length_mm: 35.0          # f, mapped to MONeRFModelConfig.focal_length_mm
+      f_number: 2.8                  # N, mapped to MONeRFModelConfig.f_number
+      aperture_dia_mm: 12.5          # A = f / N, informational
+      focus_distance_m: 1.5          # z_f (a.k.a. u_f)
+      sensor_distance_mm: null       # optional s = u_f * f / (u_f - f)
+      kappa: null                    # if null, computed as A*f / (z_f - f)
+      beta: 1.5                      # PSF calibration coefficient
+      blur_kernel_size: 15
+      sigma_min: 0.1
+      sigma_max: 10.0
+
+  hand_eye:
+    X_init_path: calibration/hand_eye_init.yaml
+    optimize_in_tier3: true
+    # The 6-DoF se(3) initialization consumed by Tier3GlobalAlignment.X_se3
+    X_init_se3: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+  base_workpiece:
+    T_base_workpiece_path: calibration/T_base_workpiece.yaml
+
+  cmm:
+    use_cmm_ground_truth: true
+    board_8ball_centers_path: calibration/8ball_centers.yaml

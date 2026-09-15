@@ -1,0 +1,39 @@
+# ==============================================================================
+# Evaluation Configuration
+# ==============================================================================
+
+eval:
+  metrics:
+    # Pose accuracy (Sec. 5, paper's headline numbers)
+    - mean_position_error_mm                 # 0.062 mm target
+    - mean_orientation_error_deg             # 0.018° target
+    - sphere_center_rmse_mm                  # 0.020 mm target
+
+    # Camera pose inversion (Sec. 2.2, iNeRF)
+    - camera_pose_position_error_mm          # 0.019 mm target
+    - camera_pose_orientation_error_deg      # 0.008° target
+
+    # Symbiotic loop convergence (Sec. 3.3)
+    - epsilon_cm                             # mean ||Log((T^Prop)^{-1} T^Vis)||
+    - w_conf                                 # Eq. 24, in [0, 1]
+    - l_pose
+    - l_gcl
+
+    # Tier-level diagnostics
+    - tier1_l_trans
+    - tier1_l_rep
+    - tier2_l_cell
+    - tier2_l_spatial
+    - tier3_l_pose
+
+    # MONeRF
+    - psnr
+    - depth_rmse_mm
+    - normal_cosine_error_deg
+    - defocus_loss
+
+  eval_sets:
+    - unseen_target_poses_600                # 600 unseen target poses
+    - cam_pose_val                           # iNeRF pose refinement val
+
+  report_by_cycle: true                      # emit per-cycle metrics for the symbiotic loop

@@ -1,0 +1,32 @@
+# ==============================================================================
+# DPHCGCL Global Default Configuration
+# ==============================================================================
+
+project:
+  name: DPHCGCL
+  seed: 42
+  device: cuda
+  output_dir: outputs/${project.name}
+
+paths:
+  log_dir: ${project.output_dir}/logs
+  ckpt_dir: ${project.output_dir}/checkpoints
+
+symbiotic_loop:
+  max_cycles: 15
+  convergence_criteria:
+    epsilon_cm_relative_change: 0.005      # Sec. 3.3 convergence
+    epsilon_cm_patience: 3
+    w_conf_std_threshold: 0.01             # std(w_conf) over batch
+    nerf_geo_loss_change: 1.0e-4           # |Δ L_geo^dynamic|
+    tier3_pose_residual: 1.0e-4            # L_pose plateau
+
+  # Order of one symbiotic cycle
+  run_order: [tier1, tier2, tier3, nerf, inerf]
+
+  # Whether Tier-1 is re-run each cycle or only once
+  tier1_every_cycle: false
+
+logging:
+  level: INFO
+  save_checkpoint_every_cycle: true
